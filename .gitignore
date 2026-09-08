@@ -1,0 +1,9 @@
+*.log
+*.tmp
+config.yaml
+_output
+.DS_Store
+.vscode
+.claude
+zabbix-exporter
+zabbix-exporter.tar.gz

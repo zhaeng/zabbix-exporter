@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-exporter-dm
+  namespace: zabbix-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-exporter
+  template:
+    metadata:
+      name: zabbix-exporter-pod
+      labels:
+        app: zabbix-exporter
+    spec:
+      containers:
+        - name: zabbix-exporter
+          
+          image: ghcr.io/your-org/zabbix-exporter:latest
+          # If using a local image, use Never, default is Always
+          #imagePullPolicy: Never
+          command: ["./zabbix-exporter", "-c", "/app/configs/config.yaml"]
+          env:
+            - name: ZABBIX_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-exporter-secrets
+                  key: zabbix-api-key
+            - name: REMOTE_WRITE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-exporter-secrets
+                  key: remote-write-username
+                  optional: true
+            - name: REMOTE_WRITE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zabbix-exporter-secrets
+                  key: remote-write-password
+                  optional: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
+          volumeMounts:
+            - name: zabbix-exporter-vl
+              mountPath: /app/configs/
+              readOnly: true
+
+          ports:
+            - name: http-port
+              containerPort: 9110
+          readinessProbe:
+            httpGet:
+              port: http-port
+              path: /ready
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              port: http-port
+              path: /health
+
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      volumes:
+        - name: zabbix-exporter-vl
+          configMap:
+            name: zabbix-exporter-config

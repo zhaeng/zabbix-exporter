@@ -1,0 +1,361 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Zabbix Exporter API requests, scheduler pressure, cache health, and Remote Write publishing.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "All Zabbix JSON-RPC requests completed per second.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 2, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "sum(rate(zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "API RPS", "range": true, "refId": "A" }],
+      "title": "Zabbix API 请求速率",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Share of Zabbix API requests whose status is not success.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 2, "max": 1, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "clamp_min(sum(rate(zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) - sum(rate(zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\",status=\"success\"}[$__rate_interval])), 0) / clamp_min(sum(rate(zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])), 1e-9)", "legendFormat": "error ratio", "range": true, "refId": "A" }],
+      "title": "Zabbix API 错误率",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Current requests that have entered the HTTP client but have not completed.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 4 }, { "color": "red", "value": 8 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "sum(zabbix_exporter_api_requests_in_flight{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "in flight", "range": true, "refId": "A" }],
+      "title": "当前 API 请求数",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Current scheduled group queue depth. A value pinned at capacity indicates collection backpressure.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 64 }, { "color": "red", "value": 128 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "sum(zabbix_exporter_scheduler_queue_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "scheduler queue", "range": true, "refId": "A" }],
+      "title": "采集调度队列",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Current Remote Write batches waiting for a worker.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 50 }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "sum(zabbix_exporter_push_queue_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "push queue", "range": true, "refId": "A" }],
+      "title": "Remote Write 队列",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Share of Remote Write batch outcomes that are not success.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 2, "max": 1, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.01 }, { "color": "red", "value": 0.05 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "options": { "colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto", "wideLayout": true },
+      "pluginVersion": "10.0.0",
+      "targets": [{ "editorMode": "code", "expr": "clamp_min(sum(rate(zabbix_exporter_push_batches_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) - sum(rate(zabbix_exporter_push_batches_total{job=~\"$job\",instance=~\"$instance\",status=\"success\"}[$__rate_interval])), 0) / clamp_min(sum(rate(zabbix_exporter_push_batches_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])), 1e-9)", "legendFormat": "failure ratio", "range": true, "refId": "A" }],
+      "title": "Remote Write 失败率",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 },
+      "id": 100,
+      "panels": [],
+      "title": "Zabbix API 网络请求",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "id": 10,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum by (method, status) (rate(zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{method}} / {{status}}", "range": true, "refId": "A" }],
+      "title": "API 请求速率（接口 / 状态）",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "id": 11,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "(sum by (method) (increase(zabbix_exporter_api_request_duration_seconds_sum{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) / sum by (method) (increase(zabbix_exporter_api_request_duration_seconds_count{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))) and on (method) (sum by (method) (increase(zabbix_exporter_api_request_duration_seconds_count{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) > 0)", "legendFormat": "avg {{method}}", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "histogram_quantile(0.95, sum by (method, le) (rate(zabbix_exporter_api_request_duration_seconds_bucket{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p95 {{method}}", "range": true, "refId": "B" }
+      ],
+      "title": "API 平均与 P95 请求耗时",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 15, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "normal" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 13 },
+      "id": 12,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum by (method) (zabbix_exporter_api_requests_in_flight{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "{{method}}", "range": true, "refId": "A" }],
+      "title": "当前 API In-flight",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "History batch outcomes and the 5-minute rate of responses that reached the configured history limit.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 13 },
+      "id": 13,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (status) (rate(zabbix_exporter_history_batches_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{status}}", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(zabbix_exporter_history_limit_hits_total{job=~\"$job\",instance=~\"$instance\"}[5m]))", "legendFormat": "limit hits / s", "range": true, "refId": "B" }
+      ],
+      "title": "History 批次结果与 Limit 命中速率",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 13 },
+      "id": 14,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_scheduler_queue_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "queue", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_scheduler_inflight{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "inflight", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(rate(zabbix_exporter_group_runs_total{job=~\"$job\",instance=~\"$instance\",status=\"queue_full\"}[$__rate_interval]))", "legendFormat": "queue_full/s", "range": true, "refId": "C" }
+      ],
+      "title": "Scheduler 压力",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Counters since the selected exporter process started or since the counter was reset.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 20 },
+      "id": 15,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "editorMode": "code", "expr": "sum by (method, status) (zabbix_exporter_api_requests_total{job=~\"$job\",instance=~\"$instance\"})", "format": "table", "instant": true, "legendFormat": "{{method}} / {{status}}", "range": false, "refId": "A" }],
+      "title": "API 累计请求数",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "Cumulative average latency since process start. Use the time-series panel above for a recent moving average.",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "decimals": 3, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 20 },
+      "id": 16,
+      "options": { "cellHeight": "sm", "footer": { "countRows": false, "fields": "", "reducer": ["sum"], "show": false }, "showHeader": true },
+      "targets": [{ "editorMode": "code", "expr": "sum by (method) (zabbix_exporter_api_request_duration_seconds_sum{job=~\"$job\",instance=~\"$instance\"}) / clamp_min(sum by (method) (zabbix_exporter_api_request_duration_seconds_count{job=~\"$job\",instance=~\"$instance\"}), 1)", "format": "table", "instant": true, "legendFormat": "{{method}}", "range": false, "refId": "A" }],
+      "title": "API 累计平均请求耗时",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+      "id": 101,
+      "panels": [],
+      "title": "Remote Write 指标推送",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 27 },
+      "id": 20,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum by (status) (rate(zabbix_exporter_push_batches_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{status}}", "range": true, "refId": "A" }],
+      "title": "Remote Write 批次结果速率",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "Bps" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 27 },
+      "id": 21,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum by (encoding) (rate(zabbix_exporter_push_batch_bytes_sum{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{encoding}}", "range": true, "refId": "A" }],
+      "title": "Remote Write 数据吞吐",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 35 },
+      "id": 22,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_push_queue_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "queue", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(rate(zabbix_exporter_push_coalesced_cycles_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "coalesced/s", "range": true, "refId": "B" }
+      ],
+      "title": "Push 队列与合并周期",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 35 },
+      "id": 23,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "sum(rate(zabbix_exporter_push_batch_series_sum{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])) / clamp_min(sum(rate(zabbix_exporter_push_batch_series_count{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])), 1e-9)", "legendFormat": "series/batch", "range": true, "refId": "A" }],
+      "title": "平均每批 Series 数",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 10, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 35 },
+      "id": 24,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(zabbix_exporter_push_slot_duration_seconds_bucket{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "slot p95", "range": true, "refId": "A" }],
+      "title": "Push Slot P95 耗时",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
+      "id": 102,
+      "panels": [],
+      "title": "缓存与过期",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 43 },
+      "id": 30,
+      "options": { "legend": { "calcs": ["lastNotNull", "min", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "cache entries", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_metadata_items{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "metadata items", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_metadata_enabled_items{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "enabled items", "range": true, "refId": "C" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_valid_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "valid cache", "range": true, "refId": "D" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_fresh_entries{job=~\"$job\",instance=~\"$instance\"})", "legendFormat": "fresh cache", "range": true, "refId": "E" }
+      ],
+      "title": "ValueCache 与 Metadata 覆盖",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" } }, "unit": "ops" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 43 },
+      "id": 31,
+      "options": { "legend": { "calcs": ["lastNotNull", "mean"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum by (reason) (rate(zabbix_exporter_value_cache_expired_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "expired {{reason}}", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum by (result) (rate(zabbix_exporter_value_cache_misses_total{job=~\"$job\",instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "miss {{result}}", "range": true, "refId": "B" }
+      ],
+      "title": "缓存过期与 Miss 速率",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "$datasource" },
+      "description": "All ratios use enabled numeric metadata items as the denominator. Cache entries may temporarily include disabled or invalid states waiting for hard-TTL cleanup; valid is usable cache state, and fresh additionally requires the source-derived expiry time not to have passed.",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 12, "gradientMode": "none", "hideFrom": { "legend": false, "tooltip": false, "viz": false }, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 5, "scaleDistribution": { "type": "linear" }, "showPoints": "never", "spanNulls": false, "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "line" } }, "min": 0, "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.9 }, { "color": "green", "value": 0.95 }] }, "unit": "percentunit" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 50 },
+      "id": 32,
+      "options": { "legend": { "calcs": ["lastNotNull", "min", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_entries{job=~\"$job\",instance=~\"$instance\"}) / clamp_min(sum(zabbix_exporter_metadata_enabled_items{job=~\"$job\",instance=~\"$instance\"}), 1)", "legendFormat": "有缓存条目", "range": true, "refId": "A" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_valid_entries{job=~\"$job\",instance=~\"$instance\"}) / clamp_min(sum(zabbix_exporter_metadata_enabled_items{job=~\"$job\",instance=~\"$instance\"}), 1)", "legendFormat": "有效值", "range": true, "refId": "B" },
+        { "editorMode": "code", "expr": "sum(zabbix_exporter_value_cache_fresh_entries{job=~\"$job\",instance=~\"$instance\"}) / clamp_min(sum(zabbix_exporter_metadata_enabled_items{job=~\"$job\",instance=~\"$instance\"}), 1)", "legendFormat": "Fresh / 未过期", "range": true, "refId": "C" }
+      ],
+      "title": "Enabled Item 缓存覆盖率",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["zabbix", "exporter", "remote-write"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Prometheus",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "$datasource" },
+        "definition": "label_values(zabbix_exporter_value_cache_entries, job)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Job",
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": { "query": "label_values(zabbix_exporter_value_cache_entries, job)", "refId": "PrometheusVariableQueryEditor-Job" },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "$datasource" },
+        "definition": "label_values(zabbix_exporter_value_cache_entries{job=~\"$job\"}, instance)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Instance",
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": { "query": "label_values(zabbix_exporter_value_cache_entries{job=~\"$job\"}, instance)", "refId": "PrometheusVariableQueryEditor-Instance" },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Zabbix Exporter - API 与指标推送",
+  "uid": "zabbix-exporter-observability",
+  "version": 1,
+  "weekStart": ""
+}

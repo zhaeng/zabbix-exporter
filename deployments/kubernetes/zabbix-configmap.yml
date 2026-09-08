@@ -1,0 +1,78 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: zabbix-exporter-config
+  namespace: zabbix-exporter
+data:
+  config.yaml: |-
+    zabbix:
+      url: "https://zabbix.example.com/api_jsonrpc.php"
+      api_key: "${ZABBIX_API_KEY}"
+      tls_skip_verify: false
+      refresh_token_interval: 300  # 提前刷新 token 秒数
+
+    prometheus:
+      pull:
+        enabled: true
+        port: 9110
+        path: "/metrics"
+        internal_path: "/internal/metrics"
+      push:
+        enabled: false
+        interval: 60
+        spread_slots: 12
+        page_size: 5000
+        max_batch_bytes: 4194304
+        workers: 4
+        queue_capacity: 100
+        max_retries: 3
+        retry_backoff: 100ms
+        max_retry_backoff: 2s
+        remote_write:
+          endpoints:
+            - url: "https://prometheus.example.com/api/v1/write"
+              timeout: 30s
+              max_samples_per_send: 2000
+              basic_auth:
+                username: "${REMOTE_WRITE_USERNAME}"
+                password: "${REMOTE_WRITE_PASSWORD}"
+    collector:
+      workers: 32
+      scheduler_queue_capacity: 128
+      history_query_concurrency: 4
+      history_batch_size: 50
+      history_query_timeout: 30s
+      history_max_limit: 2000
+      query_overlap: 5m
+      startup_spread_window: 60s
+      metadata_refresh_interval: 20m
+      metadata_workers: 2
+      metadata_batch_hosts: 50
+      metadata_request_timeout: 30s
+      metadata_min_request_interval: 100ms
+      metadata_delay_fallback: 60s
+
+    labels:
+      global:
+        env: "example"
+        source: zabbix
+      host:
+        # 支持从主机属性动态获取，如: cluster: "{{host.metadata.cluster}}"
+      item: {}
+
+    metrics:
+      filter:
+        mode: "whitelist"  # whitelist 或 blacklist
+        patterns: []
+      host_groups: []
+      value_types:
+        - "numeric"
+
+    cache:
+      shards: 256
+      expiry_tick: 1m
+      expiry_max_entries_per_run: 100000
+      miss_threshold: 2
+
+    log:
+      level: "debug"  # debug, info, warn, error
