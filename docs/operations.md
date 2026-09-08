@@ -19,7 +19,7 @@ zabbix_exporter_metadata_age_seconds
 
 When monitoring this gauge, alert on:
 
-- growth in `zabbix_exporter_metadata_refresh_total{result!="success"}`;
+- growth in `zabbix_exporter_metadata_refresh_total{status!="success"}`;
 - metadata age remaining above the configured refresh interval;
 - a sudden, significant drop in enabled item or host count.
 
@@ -46,11 +46,29 @@ clamp_min(zabbix_exporter_metadata_enabled_items, 1)
 Monitor:
 
 - `zabbix_exporter_push_queue_entries`
-- `zabbix_exporter_push_batches_total{result=~"failed|queue_full|retryable|permanent"}`
+- `zabbix_exporter_push_batches_total{status=~"queue_full|retryable_failure|permanent_failure"}`
 - `zabbix_exporter_push_coalesced_cycles_total`
 - batch series/bytes and slot duration
 
 A queue that remains near capacity means Remote Write throughput is below the production rate. Check downstream throttling, networking, and authentication before adjusting workers or queue size. A larger queue only delays failure and increases memory usage.
+
+## Locating faults with the Grafana dashboard
+
+The supplied [Grafana dashboard](../deployments/zabbix-exporter-grafana-dashboard.json) is organized by fault domain. Start with the six summary cards, then open the matching detail row:
+
+| Dashboard signal | Likely fault domain | What to check next |
+|---|---|---|
+| No exporter panels have data | Prometheus scrape or exporter process | Prometheus target state, `up`, `/health`, and `/ready`. |
+| API error ratio rises | Zabbix endpoint or API | In the API status panel, `transport_error`/`timeout` indicates network or TLS; `http_error` indicates the URL, proxy, or HTTP service; `api_error` indicates authentication, permissions, or a rejected JSON-RPC request; `decode_error` indicates an unexpected response. |
+| Metadata age keeps rising and refresh errors appear | Zabbix metadata collection | Zabbix availability and permissions for `host.get`, `hostgroup.get`, and `item.get`; then inspect exporter logs. |
+| History errors, timeouts, or limit hits rise | Zabbix history collection | `history.get` permission and latency, Zabbix API capacity, `history_batch_size`, and `history_max_limit`. |
+| Scheduler queue/lag rises while API calls are slow | Collector capacity or Zabbix latency | Zabbix API latency first, then collection concurrency and batch sizing. |
+| Fresh cache coverage falls | Collection impact is now user-visible | Trace metadata, history, and scheduler panels. The cache panel shows impact, not usually the original cause. |
+| Remote Write retryable failures rise | Downstream network, HTTP 429, or HTTP 5xx | Remote Write service capacity, connectivity, and retry settings. |
+| Remote Write permanent failures rise | Downstream configuration | Endpoint URL, Basic Auth, tenant requirements, and protocol compatibility. |
+| Remote Write queue stays high or reaches capacity | Publisher backpressure | Downstream throughput, worker count, batch limits, and queue capacity. |
+
+If Pull metrics and fresh cache coverage are healthy while only Remote Write panels show failures, data collection from Zabbix is working and the problem is on the publishing path. The dashboard deliberately uses bounded status labels and does not expose response bodies; use exporter and downstream logs for the exact error message.
 
 ## Common problems
 

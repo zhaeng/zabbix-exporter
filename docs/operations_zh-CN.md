@@ -19,7 +19,7 @@ zabbix_exporter_metadata_age_seconds
 
 直接观察 gauge 时，应重点告警：
 
-- `zabbix_exporter_metadata_refresh_total{result!="success"}` 增长；
+- `zabbix_exporter_metadata_refresh_total{status!="success"}` 增长；
 - metadata age 持续超过刷新周期；
 - enabled item 或 host 数突然大幅下降。
 
@@ -46,11 +46,29 @@ clamp_min(zabbix_exporter_metadata_enabled_items, 1)
 关注：
 
 - `zabbix_exporter_push_queue_entries`
-- `zabbix_exporter_push_batches_total{result=~"failed|queue_full|retryable|permanent"}`
+- `zabbix_exporter_push_batches_total{status=~"queue_full|retryable_failure|permanent_failure"}`
 - `zabbix_exporter_push_coalesced_cycles_total`
 - batch series/bytes 和 slot duration
 
 队列长期接近容量说明 Remote Write 吞吐低于产生速率。检查下游限流、网络和认证，再考虑调整 worker/queue；扩大队列只会延迟失败并增加内存占用。
+
+## 使用 Grafana Dashboard 定位故障
+
+项目提供的 [Grafana dashboard](../deployments/zabbix-exporter-grafana-dashboard.json) 按故障域组织。先查看顶部六个概览卡片，再进入相应的详细区域：
+
+| Dashboard 信号 | 可能的故障域 | 下一步检查 |
+|---|---|---|
+| 所有 exporter 面板都没有数据 | Prometheus 抓取或 exporter 进程 | Prometheus target 状态、`up`、`/health` 和 `/ready`。 |
+| API error ratio 上升 | Zabbix endpoint 或 API | API status 面板中，`transport_error`/`timeout` 表示网络或 TLS；`http_error` 表示 URL、代理或 HTTP 服务；`api_error` 表示认证、权限或 JSON-RPC 请求被拒绝；`decode_error` 表示响应格式异常。 |
+| Metadata age 持续增长并出现刷新错误 | Zabbix metadata 采集 | Zabbix 可用性，以及 `host.get`、`hostgroup.get`、`item.get` 权限；随后检查 exporter 日志。 |
+| History error、timeout 或 limit hit 上升 | Zabbix history 采集 | `history.get` 权限和延迟、Zabbix API 容量、`history_batch_size` 与 `history_max_limit`。 |
+| Scheduler queue/lag 上升且 API 变慢 | Collector 容量或 Zabbix 延迟 | 先检查 Zabbix API 延迟，再调整采集并发和批次大小。 |
+| Fresh cache coverage 下降 | 采集问题已影响输出数据 | 回溯 metadata、history 和 scheduler 面板。Cache 面板展示影响，通常不是根因。 |
+| Remote Write retryable failure 上升 | 下游网络、HTTP 429 或 HTTP 5xx | Remote Write 服务容量、网络连通性和重试配置。 |
+| Remote Write permanent failure 上升 | 下游配置 | Endpoint URL、Basic Auth、租户要求和协议兼容性。 |
+| Remote Write queue 长期较高或达到容量 | Publisher 背压 | 下游吞吐、worker 数、batch 限制和 queue 容量。 |
+
+如果 Pull 指标和 fresh cache coverage 正常，只有 Remote Write 面板报错，说明从 Zabbix 采集数据正常，问题位于推送链路。Dashboard 只使用低基数的有限状态标签，不暴露响应正文；精确错误仍需查看 exporter 与下游日志。
 
 ## 常见问题
 

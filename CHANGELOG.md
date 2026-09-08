@@ -15,5 +15,6 @@ This project follows [Semantic Versioning](https://semver.org/) and uses the str
 - Kubernetes examples and a Grafana dashboard
 - Security updates to the Go toolchain and Prometheus dependency
 - Complete English and Simplified Chinese README, configuration, architecture, metrics, and operations documentation
+- English-only Grafana dashboard with fault-domain diagnostics for collection and Remote Write failures
 
 [Unreleased]: https://github.com/zhaeng/zabbix-exporter/commits/main

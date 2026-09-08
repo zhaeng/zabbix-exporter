@@ -15,5 +15,6 @@
 - Kubernetes 示例和 Grafana dashboard
 - 安全更新：升级 Go 工具链及 Prometheus 依赖
 - 完整的中英文 README、配置参考、架构说明、指标说明与运维排障文档
+- 全英文 Grafana dashboard，并补充采集与 Remote Write 故障域诊断视图
 
 [Unreleased]: https://github.com/zhaeng/zabbix-exporter/commits/main

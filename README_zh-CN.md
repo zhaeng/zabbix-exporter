@@ -105,7 +105,7 @@ make build
 ## Kubernetes 和 Grafana
 
 - Kubernetes 示例：[deployments/kubernetes](deployments/kubernetes/README_zh-CN.md)
-- Grafana dashboard：[deployments/zabbix-exporter-grafana-dashboard.json](deployments/zabbix-exporter-grafana-dashboard.json)
+- Grafana dashboard：[deployments/zabbix-exporter-grafana-dashboard.json](deployments/zabbix-exporter-grafana-dashboard.json)，可按 Zabbix 采集、缓存健康、调度压力和 Remote Write 推送链路定位故障
 
 部署前请修改示例镜像地址，并创建 `zabbix-exporter-secrets`。不要将真实 Secret 提交到仓库。
 

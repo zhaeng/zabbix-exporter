@@ -108,7 +108,7 @@ The CI workflow runs formatting checks, module-file checks, `go vet`, race-enabl
 - [Self-monitoring metrics](docs/metrics.md)
 - [Operations and troubleshooting](docs/operations.md)
 - [Kubernetes example](deployments/kubernetes)
-- [Grafana dashboard](deployments/zabbix-exporter-grafana-dashboard.json)
+- [Grafana dashboard](deployments/zabbix-exporter-grafana-dashboard.json), including fault-domain views for Zabbix collection, cache health, scheduler pressure, and Remote Write delivery
 
 ## Security
 
