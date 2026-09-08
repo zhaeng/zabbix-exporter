@@ -48,6 +48,16 @@ curl http://localhost:9110/metrics
 
 ## Docker
 
+拉取已发布镜像：
+
+```bash
+docker pull ghcr.io/zhaeng/zabbix-exporter:v0.1.0
+```
+
+部署时推荐固定版本 tag；`latest` 指向最新稳定版本。
+
+也可以在本地构建：
+
 ```bash
 docker build -t zabbix-exporter:local .
 docker run --rm -p 9110:9110 \
@@ -101,6 +111,8 @@ make test
 make test-race
 make build
 ```
+
+Linux、macOS 和 Windows 的预编译二进制可从 [GitHub Releases](https://github.com/zhaeng/zabbix-exporter/releases) 下载。发布版本 tag 时也会同步向 GHCR 推送多架构 Linux 镜像。
 
 ## Kubernetes 和 Grafana
 

@@ -2,7 +2,7 @@
 
 English | [简体中文](README_zh-CN.md)
 
-These manifests provide secure starting defaults, not a complete production solution. Before deployment, change the image address and Zabbix URL, then adjust resource limits for your environment.
+These manifests provide secure starting defaults, not a complete production solution. Before deployment, review the pinned image version, change the Zabbix URL, and adjust resource limits for your environment.
 
 Create the namespace and Secret:
 

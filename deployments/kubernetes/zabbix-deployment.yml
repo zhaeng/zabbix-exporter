@@ -20,7 +20,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: zabbix-exporter
-          image: ghcr.io/zhaeng/zabbix-exporter:latest
+          image: ghcr.io/zhaeng/zabbix-exporter:v0.1.0
           # If using a local image, use Never, default is Always
           #imagePullPolicy: Never
           command: ["./zabbix-exporter", "-c", "/app/configs/config.yaml"]

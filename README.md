@@ -48,6 +48,16 @@ curl http://localhost:9110/metrics
 
 ## Docker
 
+Pull the published image:
+
+```bash
+docker pull ghcr.io/zhaeng/zabbix-exporter:v0.1.0
+```
+
+Versioned tags are recommended for deployments. `latest` tracks the newest stable release.
+
+To build locally instead:
+
 ```bash
 docker build -t zabbix-exporter:local .
 docker run --rm -p 9110:9110 \
@@ -100,6 +110,8 @@ make check
 ```
 
 The CI workflow runs formatting checks, module-file checks, `go vet`, race-enabled tests, builds, and `govulncheck`. CodeQL runs independently.
+
+Prebuilt binaries for Linux, macOS, and Windows are available from [GitHub Releases](https://github.com/zhaeng/zabbix-exporter/releases). Release tags also publish multi-architecture Linux images to GHCR.
 
 ## Documentation
 
