@@ -6,7 +6,7 @@ import (
 	"context"
 	"time"
 
-	"zabbix-exporter/internal/zabbix"
+	"github.com/zhaeng/zabbix-exporter/internal/zabbix"
 
 	"github.com/prometheus/prometheus/prompb"
 )

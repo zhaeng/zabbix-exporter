@@ -1,4 +1,4 @@
-module zabbix-exporter
+module github.com/zhaeng/zabbix-exporter
 
 go 1.22
 

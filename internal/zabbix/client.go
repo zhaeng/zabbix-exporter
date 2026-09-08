@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"zabbix-exporter/internal/metrics"
+	"github.com/zhaeng/zabbix-exporter/internal/metrics"
 )
 
 type responseDecodeError struct {

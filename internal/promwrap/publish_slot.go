@@ -3,7 +3,7 @@ package promwrap
 import (
 	"fmt"
 
-	"zabbix-exporter/internal/cache"
+	"github.com/zhaeng/zabbix-exporter/internal/cache"
 )
 
 // SeriesFingerprint is stable across process restarts. The current data model

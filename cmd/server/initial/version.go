@@ -1,7 +1,7 @@
 package initial
 
 var (
-	GitCommit string
-	BuildTime string
-	Version string
+	GitCommit = "unknown"
+	BuildTime = "unknown"
+	Version   = "dev"
 )

@@ -1,0 +1,7 @@
+.git
+.github
+_output
+config.yaml
+cover.out
+*.log
+*.tmp

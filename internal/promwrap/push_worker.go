@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"zabbix-exporter/internal/cache"
+	"github.com/zhaeng/zabbix-exporter/internal/cache"
 )
 
 const (

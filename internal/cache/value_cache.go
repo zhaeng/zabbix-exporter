@@ -9,9 +9,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"zabbix-exporter/internal/metadata"
-	"zabbix-exporter/internal/metrics"
-	"zabbix-exporter/internal/zabbix"
+	"github.com/zhaeng/zabbix-exporter/internal/metadata"
+	"github.com/zhaeng/zabbix-exporter/internal/metrics"
+	"github.com/zhaeng/zabbix-exporter/internal/zabbix"
 )
 
 const (

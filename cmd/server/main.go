@@ -15,23 +15,30 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 
-	"zabbix-exporter/internal/config"
-	"zabbix-exporter/internal/log"
-	"zabbix-exporter/internal/pipeline"
-	"zabbix-exporter/internal/prometheus/exporter"
-	"zabbix-exporter/internal/zabbix"
+	"github.com/zhaeng/zabbix-exporter/cmd/server/initial"
+	"github.com/zhaeng/zabbix-exporter/internal/config"
+	"github.com/zhaeng/zabbix-exporter/internal/log"
+	"github.com/zhaeng/zabbix-exporter/internal/pipeline"
+	"github.com/zhaeng/zabbix-exporter/internal/prometheus/exporter"
+	"github.com/zhaeng/zabbix-exporter/internal/zabbix"
 )
 
 const shutdownTimeout = 5 * time.Second
 
 var configPath string
+var showVersion bool
 
 func init() {
 	pflag.StringVarP(&configPath, "config", "c", "config.yaml", "Path to configuration file")
+	pflag.BoolVarP(&showVersion, "version", "v", false, "Print version information")
 	pflag.Parse()
 }
 
 func main() {
+	if showVersion {
+		fmt.Printf("zabbix-exporter %s (commit=%s, built=%s)\n", initial.Version, initial.GitCommit, initial.BuildTime)
+		return
+	}
 	cfg, err := config.Load(configPath)
 	if err != nil {
 		log.Error("Failed to load config: %v", err)

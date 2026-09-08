@@ -7,7 +7,7 @@ import (
 	"github.com/golang/snappy"
 	"github.com/prometheus/prometheus/prompb"
 
-	"zabbix-exporter/internal/cache"
+	"github.com/zhaeng/zabbix-exporter/internal/cache"
 )
 
 type publishKey struct {

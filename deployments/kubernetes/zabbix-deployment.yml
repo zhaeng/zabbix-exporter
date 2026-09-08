@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zabbix-exporter-dm
+  name: zabbix-exporter
   namespace: zabbix-exporter
 spec:
   replicas: 1
@@ -14,13 +14,21 @@ spec:
       labels:
         app: zabbix-exporter
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: zabbix-exporter
-          
-          image: ghcr.io/your-org/zabbix-exporter:latest
+          image: ghcr.io/zhaeng/zabbix-exporter:latest
           # If using a local image, use Never, default is Always
           #imagePullPolicy: Never
           command: ["./zabbix-exporter", "-c", "/app/configs/config.yaml"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
           env:
             - name: ZABBIX_API_KEY
               valueFrom:
@@ -52,11 +60,11 @@ spec:
               readOnly: true
 
           ports:
-            - name: http-port
+            - name: http
               containerPort: 9110
           readinessProbe:
             httpGet:
-              port: http-port
+              port: http
               path: /ready
             initialDelaySeconds: 10
             timeoutSeconds: 2
@@ -65,7 +73,7 @@ spec:
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              port: http-port
+              port: http
               path: /health
 
             initialDelaySeconds: 10

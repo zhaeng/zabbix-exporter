@@ -3,7 +3,7 @@ package filter
 import (
 	"regexp"
 
-	"zabbix-exporter/internal/config"
+	"github.com/zhaeng/zabbix-exporter/internal/config"
 )
 
 // Filter 指标过滤器

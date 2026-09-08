@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"zabbix-exporter/internal/cache"
-	"zabbix-exporter/internal/metadata"
-	"zabbix-exporter/internal/scheduler"
-	"zabbix-exporter/internal/zabbix"
+	"github.com/zhaeng/zabbix-exporter/internal/cache"
+	"github.com/zhaeng/zabbix-exporter/internal/metadata"
+	"github.com/zhaeng/zabbix-exporter/internal/scheduler"
+	"github.com/zhaeng/zabbix-exporter/internal/zabbix"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"zabbix-exporter/internal/metrics"
+	"github.com/zhaeng/zabbix-exporter/internal/metrics"
 )
 
 type collectionTask struct {

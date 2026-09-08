@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"zabbix-exporter/internal/config"
-	"zabbix-exporter/internal/zabbix"
+	"github.com/zhaeng/zabbix-exporter/internal/config"
+	"github.com/zhaeng/zabbix-exporter/internal/zabbix"
 
 	"github.com/prometheus/prometheus/prompb"
 )

@@ -7,8 +7,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/prometheus/prompb"
 
-	"zabbix-exporter/internal/cache"
-	"zabbix-exporter/internal/metadata"
+	"github.com/zhaeng/zabbix-exporter/internal/cache"
+	"github.com/zhaeng/zabbix-exporter/internal/metadata"
 )
 
 const defaultScrapePageSize = 5000

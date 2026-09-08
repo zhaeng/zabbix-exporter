@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"zabbix-exporter/internal/metadata"
+	"github.com/zhaeng/zabbix-exporter/internal/metadata"
 )
 
 const DefaultBatchSize = 50
