@@ -1,5 +1,7 @@
 # Zabbix Exporter
 
+[English](README_EN.md) | 简体中文
+
 [![CI](https://github.com/zhaeng/zabbix-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaeng/zabbix-exporter/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/zhaeng/zabbix-exporter/actions/workflows/codeql.yml/badge.svg)](https://github.com/zhaeng/zabbix-exporter/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/github/license/zhaeng/zabbix-exporter)](LICENSE)
@@ -75,7 +77,7 @@ scrape_configs:
 
 ## 配置
 
-完整配置和默认建议见 [config.example.yaml](config.example.yaml)。启用 Push 时必须且只能配置一个 Remote Write endpoint：
+完整配置和默认建议见 [配置参考](docs/configuration.md) 和 [config.example.yaml](config.example.yaml)。启用 Push 时必须且只能配置一个 Remote Write endpoint：
 
 ```yaml
 prometheus:
@@ -106,6 +108,13 @@ make build
 - Grafana dashboard：[deployments/zabbix-exporter-grafana-dashboard.json](deployments/zabbix-exporter-grafana-dashboard.json)
 
 部署前请修改示例镜像地址，并创建 `zabbix-exporter-secrets`。不要将真实 Secret 提交到仓库。
+
+## 文档
+
+- [架构与数据流](docs/architecture.md)
+- [配置参考](docs/configuration.md)
+- [自监控指标](docs/metrics.md)
+- [运维与排障](docs/operations.md)
 
 ## 安全说明
 
