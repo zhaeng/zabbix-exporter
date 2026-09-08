@@ -1,10 +1,12 @@
-# 架构与数据流 / Architecture and Data Flow
+# Architecture and Data Flow
 
-## 目标
+English | [简体中文](architecture_zh-CN.md)
 
-Zabbix Exporter 将“向 Zabbix 读取数据”和“向 Prometheus 暴露或推送数据”解耦。Zabbix API 请求只发生在后台 metadata 与 history pipeline；Pull 和 Push 都读取内存快照，因此外部抓取频率不会直接放大 Zabbix API 压力。
+## Goals
 
-## 总体架构
+Zabbix Exporter separates reading data from Zabbix from exposing or pushing it to Prometheus. Zabbix API requests occur only in the background metadata and history pipelines. Both Pull and Push read in-memory snapshots, so an increased scrape frequency does not directly increase pressure on the Zabbix API.
+
+## System overview
 
 ```mermaid
 flowchart LR
@@ -37,112 +39,112 @@ flowchart LR
     PP --> RW
 ```
 
-## 启动与关闭
+## Startup and shutdown
 
-启动顺序：
+Startup follows this sequence:
 
-1. 加载并校验配置。
-2. 创建 Zabbix client，启动 API key 或登录 token 管理。
-3. 创建 scheduled pipeline。
-4. 完成第一次 metadata 刷新；完整快照成功后才继续。
-5. 启动 scheduler、expiry wheel，以及可选 Remote Write publisher。
-6. 注册指标并启动 HTTP server。
+1. Load and validate configuration.
+2. Create the Zabbix client and start API-key or login-token management.
+3. Create the scheduled collection pipeline.
+4. Complete the first metadata refresh; startup continues only after a complete snapshot succeeds.
+5. Start the scheduler, expiry wheel, and optional Remote Write publisher.
+6. Register metrics and start the HTTP server.
 
-关闭由 SIGINT/SIGTERM 或上层 context 触发。HTTP server、publisher、expiry、scheduler 和 token manager 使用有界 context 停止，避免无限等待。关闭期间 `/ready` 返回非 2xx。
+SIGINT, SIGTERM, or cancellation of the parent context starts shutdown. The HTTP server, publisher, expiry wheel, scheduler, and token manager stop through bounded contexts. `/ready` returns a non-2xx response while the service is shutting down.
 
-## Metadata 平面
+## Metadata plane
 
-`metadata.Refresher` 低频读取 host 与 item 定义：
+`metadata.Refresher` reads host and item definitions at a relatively low frequency:
 
-- host group/IP/item filter 在 metadata 入口执行；
-- `item.get` 只读取定义，不读取当前值；
-- host 分批执行 item metadata 查询，并限制并发、超时和最小请求间隔；
-- 只有所有批次完整成功并通过一致性检查后，才构建新快照；
-- 失败或不完整刷新不会替换最后一个完整快照。
+- Host-group, host-IP, and item filters run at the metadata boundary.
+- `item.get` reads definitions, not current values.
+- Item metadata is fetched in host batches with concurrency, timeout, and minimum-request-interval limits.
+- A new snapshot is built only after every batch completes successfully and passes consistency checks.
+- A failed or incomplete refresh never replaces the last complete snapshot.
 
-`metadata.Store` 通过原子替换发布不可变快照。每次完整刷新产生 snapshot version；未改变的 host/item/group 保留其 definition version，以便并发采集结果做版本校验。
+`metadata.Store` publishes an immutable snapshot using an atomic replacement. Every complete refresh creates a snapshot version. Unchanged hosts, items, and groups retain their definition versions, allowing concurrently completed collection results to be validated.
 
-## 调度与采集平面
+## Scheduling and collection plane
 
-Builder 按 `host ID + value type + delay` 形成 collection group。Scheduler 使用：
+The builder creates collection groups by `host ID + value type + delay`. The scheduler uses:
 
-- 最小堆管理下一次执行时间；
-- 固定 worker pool；
-- 有界任务队列；
-- 启动错峰，避免服务启动瞬间冲击 Zabbix；
-- metadata diff 对 group 做增删改对账。
+- a min-heap for the next due time;
+- a fixed worker pool;
+- a bounded task queue;
+- startup spreading to avoid a burst against Zabbix;
+- metadata diffs to reconcile added, removed, and changed groups.
 
-每个 group 再按 `history_batch_size` 切成物理批次，并受全局 `history_query_concurrency` 限制。History 查询带 `time_from`、`time_till`、排序和 limit，使用重叠窗口降低边界丢点风险。
+Each group is split into physical batches using `history_batch_size`, with global concurrency bounded by `history_query_concurrency`. History requests include `time_from`, `time_till`, ordering, and a result limit. An overlapping query window reduces the chance of losing samples at time boundaries.
 
-## ValueCache 语义
+## ValueCache semantics
 
-ValueCache 以 item ID 为键，按固定数量分片并独立加锁。每个 item 仅保留一个标量状态，而不是无界样本切片：
+ValueCache is keyed by item ID, split across a fixed number of independently locked shards. Each item stores one scalar state rather than an unbounded sample slice:
 
-- 值与 Zabbix `clock/ns` 源时间；
-- item delay、硬过期时间和有效状态；
-- metadata/value version；
-- 发布 slot、发布策略和最后确认状态。
+- value and Zabbix `clock/ns` source time;
+- item delay, hard expiry, and validity;
+- metadata and value versions;
+- publishing slot, publishing policy, and last acknowledgement state.
 
-应用采集结果时会检查 metadata version。旧定义下完成的并发请求不能覆盖新定义状态。
+Applying a collection result checks the metadata version. A concurrent request completed against an old definition cannot overwrite state created for a newer definition.
 
-发布策略按 delay 分为：
+Publishing behavior depends on item delay:
 
-- delay ≤ 1 分钟：使用源时间戳，同一个 value version 最多确认发布一次；
-- delay > 1 分钟：sample-and-hold，在每个新发布周期使用周期时间戳重复发布，直到硬 TTL。
+- Delay ≤ 1 minute: use the source timestamp and acknowledge each value version at most once.
+- Delay > 1 minute: use sample-and-hold, republishing during each new cycle with the cycle timestamp until the hard TTL.
 
-连续 miss 只有来自完整成功批次时才计数；达到 `miss_threshold` 且超过源时间加宽限后才将旧值置为无效。Expiry wheel 按固定 tick 和单轮工作上限物理删除硬过期状态。
+Consecutive misses count only for fully successful batches. An old value becomes invalid only after `miss_threshold` is reached and the source-time grace period has elapsed. The expiry wheel physically removes hard-expired state at a fixed tick rate and with a per-run work limit.
 
-## 输出平面
+## Output plane
 
 ### Pull
 
-`/metrics` 从一次固定的 metadata snapshot 和 ValueCache 分页读取数据，同时生成 `zabbix_host`。它不调用 Zabbix API，也不修改发布确认状态。
+`/metrics` reads from one fixed metadata snapshot and paginates through ValueCache while also producing `zabbix_host`. It neither calls the Zabbix API nor changes publishing acknowledgement state.
 
-`/internal/metrics` 只使用默认 Prometheus registry，适合独立抓取 exporter 自监控指标。
+`/internal/metrics` uses only the default Prometheus registry and is suitable for scraping exporter self-monitoring metrics separately.
 
 ### Remote Write
 
-Publisher 将完整周期划分为稳定 slot，并将序列稳定映射到 worker lane：
+The publisher divides a full cycle into stable slots and maps series to stable worker lanes:
 
-- 分页读取，限制单批样本数和未压缩字节数；
-- 单一全局有界逻辑队列，按 lane 保持稳定处理；
-- 网络错误、429 和 5xx 使用有界指数退避；
-- 成功发送后才对 ValueCache 执行 version-aware ack；
-- 新的长周期批次可替换队列中已经过时的同 slot 批次；
-- 项目只支持一个 Remote Write endpoint，不实现 HA ownership。
+- paginated reads bound sample count and uncompressed bytes per batch;
+- one global bounded logical queue preserves stable processing by lane;
+- network errors, HTTP 429, and HTTP 5xx use bounded exponential backoff;
+- ValueCache receives a version-aware acknowledgement only after a successful send;
+- a new long-period batch may replace an obsolete queued batch for the same slot;
+- only one Remote Write endpoint is supported; HA ownership is not implemented.
 
-队列满或发送失败不会导致缓存无限增长，但可能造成样本未发布；应通过自监控指标告警。
+A full queue or send failure cannot make the cache grow without bound, but samples may not be published. Alert on the relevant self-monitoring metrics.
 
-## 并发与一致性边界
+## Concurrency and consistency boundaries
 
-- Metadata snapshot 不可变，通过原子指针读取。
-- ValueCache 采用分片锁，不暴露内部可变指针。
-- Scheduler 和 publisher 的队列都有明确容量。
-- 所有远程调用都由 context 和超时约束。
-- Pull 是只读视图；Remote Write ack 只影响发布资格。
-- 项目不持久化缓存，重启不会恢复旧 watermark/value state。
-- 项目目前不发送 Prometheus stale marker；host/item 删除依赖下游自身的陈旧序列处理。
+- Metadata snapshots are immutable and read through an atomic pointer.
+- ValueCache uses sharded locks and never exposes mutable internal pointers.
+- Scheduler and publisher queues have explicit capacities.
+- Every remote call is bounded by a context and timeout.
+- Pull is read-only; Remote Write acknowledgements affect publishing eligibility only.
+- Cache and watermark state are not persisted across restarts.
+- Prometheus stale markers are not emitted; downstream systems must handle series that disappear after host or item removal.
 
-## 包职责
+## Package responsibilities
 
-| 包 | 职责 |
+| Package | Responsibility |
 |---|---|
-| `cmd/server` | 进程生命周期、HTTP 端点和依赖组装。 |
-| `internal/config` | YAML、环境变量展开、默认值和校验。 |
-| `internal/zabbix` | JSON-RPC、认证、metadata/history 请求。 |
-| `internal/metadata` | 不可变定义快照、diff、标签和 collection group。 |
-| `internal/scheduler` | 到期堆、任务队列和 worker pool。 |
-| `internal/collector` | history 批次采集与 watermark。 |
-| `internal/cache` | 分片 ValueCache、发布状态和 expiry wheel。 |
-| `internal/prometheus/exporter` | Prometheus Pull collector。 |
-| `internal/promwrap` | Remote Write 编码、队列、worker、重试和 ack。 |
-| `internal/metrics` | exporter 自监控指标。 |
+| `cmd/server` | Process lifecycle, HTTP endpoints, and dependency assembly. |
+| `internal/config` | YAML parsing, environment expansion, defaults, and validation. |
+| `internal/zabbix` | JSON-RPC, authentication, metadata requests, and history requests. |
+| `internal/metadata` | Immutable definition snapshots, diffs, labels, and collection groups. |
+| `internal/scheduler` | Due-time heap, task queue, and worker pool. |
+| `internal/collector` | History batch collection and watermarks. |
+| `internal/cache` | Sharded ValueCache, publishing state, and expiry wheel. |
+| `internal/prometheus/exporter` | Prometheus Pull collector. |
+| `internal/promwrap` | Remote Write encoding, queueing, workers, retries, and acknowledgements. |
+| `internal/metrics` | Exporter self-monitoring metrics. |
 
-## 已知限制
+## Known limitations
 
-- 只支持数值型 item（Zabbix value type 0 和 3）。
-- 只支持一个 Remote Write endpoint。
-- HTTP 端点本身不提供 TLS 或认证。
-- 配置不支持热重载，修改后需要重启。
-- 缓存和 watermark 不持久化。
-- 不发送 stale marker。
+- Only numeric items are supported (Zabbix value types 0 and 3).
+- Only one Remote Write endpoint is supported.
+- HTTP endpoints do not provide built-in TLS or authentication.
+- Configuration cannot be reloaded without restarting the process.
+- Cache and watermark state are not persistent.
+- Stale markers are not emitted.

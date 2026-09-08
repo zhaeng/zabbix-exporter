@@ -1,17 +1,19 @@
 # Changelog
 
-本项目遵循 [Semantic Versioning](https://semver.org/)；变更记录采用 [Keep a Changelog](https://keepachangelog.com/) 的结构。
+English | [简体中文](CHANGELOG_zh-CN.md)
+
+This project follows [Semantic Versioning](https://semver.org/) and uses the structure defined by [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
 ### Added
 
-- 初始开源版本
-- Zabbix metadata 与 history 增量采集
-- Prometheus Pull 和 Remote Write Push
-- exporter 自监控指标、健康与就绪检查
-- Kubernetes 示例和 Grafana dashboard
-- 安全更新：升级 Go 工具链及 Prometheus 依赖
-- 英文 README、配置参考、架构说明与运维排障文档
+- Initial open-source release
+- Incremental Zabbix metadata and history collection
+- Prometheus Pull and Remote Write Push
+- Exporter self-monitoring metrics, health checks, and readiness checks
+- Kubernetes examples and a Grafana dashboard
+- Security updates to the Go toolchain and Prometheus dependency
+- Complete English and Simplified Chinese README, configuration, architecture, metrics, and operations documentation
 
 [Unreleased]: https://github.com/zhaeng/zabbix-exporter/commits/main

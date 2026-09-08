@@ -1,14 +1,16 @@
-# 贡献指南
+# Contributing Guide
 
-感谢你参与 Zabbix Exporter。
+English | [简体中文](CONTRIBUTING_zh-CN.md)
 
-## 开始之前
+Thank you for contributing to Zabbix Exporter.
 
-1. 搜索现有 Issue，避免重复工作。
-2. 对较大的功能、协议变化或不兼容修改，先创建 Issue 讨论方案。
-3. 安全漏洞不要提交公开 Issue，请遵循 [SECURITY.md](SECURITY.md)。
+## Before you begin
 
-## 本地开发
+1. Search existing issues to avoid duplicate work.
+2. Open an issue before implementing a large feature, protocol change, or backward-incompatible change.
+3. Do not report security vulnerabilities in a public issue; follow [SECURITY.md](SECURITY.md).
+
+## Local development
 
 ```bash
 git clone https://github.com/zhaeng/zabbix-exporter.git
@@ -17,15 +19,15 @@ go mod download
 make check
 ```
 
-测试不得依赖生产 Zabbix、真实凭据或公网 Remote Write 服务。新增行为应使用 mock HTTP server、fixture 或 fake clock 验证。
+Tests must not depend on a production Zabbix instance, real credentials, or a public Remote Write service. Test new behavior with mock HTTP servers, fixtures, or a fake clock.
 
-## Pull Request 要求
+## Pull request requirements
 
-- 每个 PR 聚焦一个问题，说明动机、行为变化和验证方式。
-- 新功能和缺陷修复应包含测试。
-- 配置或用户可见行为变化应同步更新 README、示例配置和 CHANGELOG。
-- 不得提交密码、token、API key、内部地址或真实监控数据。
-- 提交应能通过 `make check`。
-- 贡献内容按照本仓库的 Apache-2.0 许可证提供。
+- Keep each pull request focused on one problem and describe the motivation, behavior change, and verification performed.
+- Include tests for new features and bug fixes.
+- Update the README, example configuration, and CHANGELOG when configuration or user-visible behavior changes.
+- Never commit passwords, tokens, API keys, internal addresses, or real monitoring data.
+- Ensure `make check` passes.
+- Contributions are provided under this repository's Apache-2.0 license.
 
-维护者可能要求拆分过大的 PR，或在合并前补充兼容性和性能证据。
+Maintainers may ask that an oversized pull request be split, or request compatibility and performance evidence before merging.

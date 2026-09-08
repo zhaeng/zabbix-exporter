@@ -1,15 +1,17 @@
-# 社区行为准则
+# Code of Conduct
 
-我们致力于为所有参与者提供友善、安全、无骚扰的协作环境，不因经验、身份、背景、能力或观点而区别对待。
+English | [简体中文](CODE_OF_CONDUCT_zh-CN.md)
 
-参与项目时请：
+We are committed to providing a welcoming, safe, and harassment-free environment for everyone, regardless of experience, identity, background, ability, or viewpoint.
 
-- 使用尊重、建设性的语言；
-- 聚焦技术事实和项目目标；
-- 接受合理反馈，并为错误负责；
-- 尊重隐私，不公开他人的个人信息或安全报告；
-- 避免骚扰、侮辱、威胁、歧视和持续干扰讨论。
+When participating in this project:
 
-维护者可以编辑或删除不当内容，并对严重或重复违规者限制参与。发现问题时，请通过 GitHub 私信维护者或安全报告渠道联系。维护者会尽可能保密、公正地处理。
+- use respectful and constructive language;
+- focus on technical facts and project goals;
+- accept reasonable feedback and take responsibility for mistakes;
+- respect privacy and do not disclose personal information or security reports;
+- avoid harassment, insults, threats, discrimination, or sustained disruption.
 
-本准则适用于仓库、Issue、Pull Request、讨论区以及代表本项目参与的公开活动。
+Maintainers may edit or remove inappropriate content and restrict participation for serious or repeated violations. Report concerns privately to a maintainer through GitHub or the security reporting channel. Maintainers will handle reports as confidentially and fairly as practical.
+
+This code applies to the repository, issues, pull requests, discussions, and public activities where someone represents the project.

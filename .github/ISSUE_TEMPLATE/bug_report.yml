@@ -1,50 +1,50 @@
-name: Bug 报告
-description: 报告可复现的缺陷
+name: Bug report
+description: Report a reproducible defect
 title: "[Bug]: "
 labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        感谢反馈。请先删除密码、token、API key、内部地址和真实监控数据。
+        Thank you for the report. Remove passwords, tokens, API keys, internal addresses, and real monitoring data first.
   - type: input
     id: version
     attributes:
-      label: 版本
-      description: 发布版本、镜像 tag 或 commit SHA
+      label: Version
+      description: Release version, image tag, or commit SHA
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
-      label: 环境
-      description: 操作系统、架构、Go/Zabbix/Prometheus 或 VictoriaMetrics 版本
+      label: Environment
+      description: Operating system, architecture, and Go/Zabbix/Prometheus or VictoriaMetrics versions
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: 复现步骤
+      label: Steps to reproduce
     validations:
       required: true
   - type: textarea
     id: expected
     attributes:
-      label: 预期行为
+      label: Expected behavior
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: 实际行为与脱敏日志
+      label: Actual behavior and redacted logs
     validations:
       required: true
   - type: checkboxes
     id: checks
     attributes:
-      label: 提交前确认
+      label: Pre-submission checklist
       options:
-        - label: 我已搜索现有 Issue
+        - label: I have searched the existing issues
           required: true
-        - label: 内容不包含凭据或敏感监控数据
+        - label: This report contains no credentials or sensitive monitoring data
           required: true

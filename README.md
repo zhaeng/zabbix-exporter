@@ -1,32 +1,32 @@
 # Zabbix Exporter
 
-[English](README_EN.md) | 简体中文
+English | [简体中文](README_zh-CN.md)
 
 [![CI](https://github.com/zhaeng/zabbix-exporter/actions/workflows/ci.yml/badge.svg)](https://github.com/zhaeng/zabbix-exporter/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/zhaeng/zabbix-exporter/actions/workflows/codeql.yml/badge.svg)](https://github.com/zhaeng/zabbix-exporter/actions/workflows/codeql.yml)
 [![License](https://img.shields.io/github/license/zhaeng/zabbix-exporter)](LICENSE)
 
-将 Zabbix 采集的数值型监控数据转换为 Prometheus 指标。支持 Prometheus Pull 和 Remote Write Push，两种模式共享同一份内存缓存，抓取 `/metrics` 不会额外请求 Zabbix API。
+Zabbix Exporter turns numeric data collected by Zabbix into Prometheus metrics. It supports both Prometheus scraping and Remote Write. Both output paths read the same in-memory cache, so scraping `/metrics` does not trigger additional Zabbix API requests.
 
-> 本项目是社区项目，与 Zabbix LLC、Prometheus Authors 或 Grafana Labs 无隶属或官方关联。相关名称和商标归各自权利人所有。
+> This is an independent community project. It is not affiliated with or endorsed by Zabbix LLC, the Prometheus Authors, or Grafana Labs. All product names and trademarks belong to their respective owners.
 
-## 功能
+## Features
 
-- 使用 Zabbix API key，或用户名和密码认证
-- 导出 numeric float 和 numeric unsigned 类型的 Zabbix item
-- 按主机组、主机 IP、item key 正则和 value type 过滤
-- 提供 `/metrics`、`/internal/metrics`、`/health` 和 `/ready`
-- 可选 Prometheus Remote Write，支持有界队列、分页、错峰和重试
-- metadata 刷新、分组调度、分片缓存和过期清理
-- 提供 Grafana dashboard 与 Kubernetes 示例
+- Zabbix API key or username/password authentication
+- Numeric float and numeric unsigned item export
+- Filtering by host group, host IP, item-key regular expression, and value type
+- `/metrics`, `/internal/metrics`, `/health`, and `/ready` endpoints
+- Optional Prometheus Remote Write with bounded queues, paging, spreading, and retries
+- Periodic metadata refresh, grouped scheduling, sharded value cache, and bounded expiry
+- Kubernetes examples and a Grafana dashboard
 
-## 要求
+## Requirements
 
-- Go 1.25 或更高版本；推荐使用 `go.mod` 指定的安全补丁工具链
-- 可访问的 Zabbix JSON-RPC API
-- API key，或具备读取 host、host group、item 和 history 权限的 Zabbix 用户
+- Go 1.25 or newer; use the patched toolchain declared in `go.mod` when possible
+- Network access to the Zabbix JSON-RPC API
+- A Zabbix API key, or a user allowed to read hosts, host groups, items, and history
 
-## 快速开始
+## Quick start
 
 ```bash
 git clone https://github.com/zhaeng/zabbix-exporter.git
@@ -36,7 +36,7 @@ export ZABBIX_API_KEY='your-zabbix-api-key'
 go run ./cmd/server -c config.yaml
 ```
 
-检查服务：
+Check the service:
 
 ```bash
 curl http://localhost:9110/health
@@ -44,7 +44,7 @@ curl http://localhost:9110/ready
 curl http://localhost:9110/metrics
 ```
 
-`config.yaml` 已被 Git 忽略。配置文件支持 `${ENVIRONMENT_VARIABLE}` 展开，请使用环境变量或密钥管理系统提供凭据。
+`config.yaml` is ignored by Git. The configuration file supports `${ENVIRONMENT_VARIABLE}` expansion; supply credentials through environment variables or a secrets manager.
 
 ## Docker
 
@@ -70,14 +70,14 @@ scrape_configs:
       - targets: ["zabbix-exporter:9110"]
 ```
 
-- `/metrics`：Zabbix 业务指标及 exporter 自监控指标
-- `/internal/metrics`：仅 exporter、Go 和 process 自监控指标
-- `/health`：进程存活检查
-- `/ready`：认证、metadata 和 scheduler 就绪检查
+- `/metrics`: Zabbix business metrics plus exporter self-metrics
+- `/internal/metrics`: exporter, Go runtime, and process metrics only
+- `/health`: process liveness
+- `/ready`: authentication, metadata, and scheduler readiness
 
-## 配置
+## Remote Write
 
-完整配置和默认建议见 [配置参考](docs/configuration.md) 和 [config.example.yaml](config.example.yaml)。启用 Push 时必须且只能配置一个 Remote Write endpoint：
+Push mode is optional. When enabled, exactly one Remote Write endpoint must be configured:
 
 ```yaml
 prometheus:
@@ -90,40 +90,34 @@ prometheus:
           max_samples_per_send: 2000
 ```
 
-API key 优先于用户名和密码。仅在无法导入内部 CA 的受控环境中使用 `tls_skip_verify: true`。
+API-key authentication takes precedence over username/password authentication. Only use `tls_skip_verify: true` in a controlled environment where installing the internal CA is not possible.
 
-## 构建与验证
+## Build and verify
 
 ```bash
-make fmt-check
-make vet
-make test
-make test-race
-make build
+make check
+./_output/zabbix-exporter --version
 ```
 
-## Kubernetes 和 Grafana
+The CI workflow runs formatting checks, module-file checks, `go vet`, race-enabled tests, builds, and `govulncheck`. CodeQL runs independently.
 
-- Kubernetes 示例：[deployments/kubernetes](deployments/kubernetes)
-- Grafana dashboard：[deployments/zabbix-exporter-grafana-dashboard.json](deployments/zabbix-exporter-grafana-dashboard.json)
+## Documentation
 
-部署前请修改示例镜像地址，并创建 `zabbix-exporter-secrets`。不要将真实 Secret 提交到仓库。
+- [Architecture and data flow](docs/architecture.md)
+- [Configuration reference](docs/configuration.md)
+- [Self-monitoring metrics](docs/metrics.md)
+- [Operations and troubleshooting](docs/operations.md)
+- [Kubernetes example](deployments/kubernetes)
+- [Grafana dashboard](deployments/zabbix-exporter-grafana-dashboard.json)
 
-## 文档
+## Security
 
-- [架构与数据流](docs/architecture.md)
-- [配置参考](docs/configuration.md)
-- [自监控指标](docs/metrics.md)
-- [运维与排障](docs/operations.md)
+Exported metrics can contain hostnames, IP addresses, and configured labels. HTTP endpoints do not provide authentication. Restrict them with a private network, NetworkPolicy, firewall, or authenticated reverse proxy. Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
-## 安全说明
+## Contributing
 
-指标可能包含主机名、IP 和业务标签。默认 HTTP 端点没有认证，请通过私有网络、NetworkPolicy、防火墙或带认证的反向代理限制访问。安全问题请按照 [SECURITY.md](SECURITY.md) 私下报告。
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 
-## 参与贡献
+## License
 
-欢迎 Issue 和 Pull Request。开始前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
-
-## 许可证
-
-本项目采用 [Apache License 2.0](LICENSE)。
+Licensed under the [Apache License 2.0](LICENSE).

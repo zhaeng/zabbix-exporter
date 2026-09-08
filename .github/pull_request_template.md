@@ -1,16 +1,16 @@
-## 变更说明
+## Summary
 
-<!-- 说明为什么需要这项变更，以及它改变了什么。 -->
+<!-- Explain why this change is needed and what it changes. -->
 
-## 验证
+## Verification
 
-<!-- 列出实际执行的测试和结果。 -->
+<!-- List the tests you ran and their results. -->
 
 - [ ] `make check`
-- [ ] 新增或更新了相关测试
-- [ ] 更新了用户文档和 CHANGELOG（如适用）
-- [ ] 确认不包含凭据、内部地址或真实监控数据
+- [ ] Relevant tests were added or updated
+- [ ] User documentation and CHANGELOG were updated when applicable
+- [ ] No credentials, internal addresses, or real monitoring data are included
 
-## 兼容性
+## Compatibility
 
-<!-- 说明配置、指标名称、标签、API 或资源占用是否发生变化。 -->
+<!-- Describe changes to configuration, metric names, labels, APIs, or resource usage. -->

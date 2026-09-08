@@ -1,26 +1,28 @@
-# 安全策略
+# Security Policy
 
-## 支持范围
+English | [简体中文](SECURITY_zh-CN.md)
 
-安全修复优先应用于最新发布版本和 `main` 分支。项目尚未发布稳定版本时，仅维护 `main`。
+## Supported versions
 
-## 报告漏洞
+Security fixes are prioritized for the latest release and the `main` branch. Until the project has a stable release, only `main` is maintained.
 
-请使用 GitHub 仓库的 **Security → Report a vulnerability** 私下报告。不要创建公开 Issue，也不要在报告中包含生产凭据或不必要的真实监控数据。
+## Reporting a vulnerability
 
-报告建议包含：
+Use the GitHub repository's **Security → Report a vulnerability** form to report vulnerabilities privately. Do not open a public issue, and do not include production credentials or unnecessary real monitoring data.
 
-- 受影响版本或提交
-- 影响和可利用条件
-- 最小复现步骤
-- 建议修复方式（如有）
+A useful report includes:
 
-维护者会尽快确认收到报告，在完成修复和发布前请避免公开披露。
+- the affected version or commit;
+- the impact and conditions required for exploitation;
+- minimal reproduction steps;
+- a suggested fix, if available.
 
-## 运维安全
+Maintainers will acknowledge the report as soon as practical. Please avoid public disclosure until a fix and release are ready.
 
-- 使用最小权限的 Zabbix API key。
-- 通过 Secret 或环境变量提供凭据。
-- 不要将 `config.yaml`、Kubernetes Secret 或真实指标样本提交到 Git。
-- 限制 `/metrics` 和健康端点的网络访问。
-- 除非处于受控网络且理解风险，否则不要启用 `tls_skip_verify`。
+## Operational security
+
+- Use a least-privilege Zabbix API key.
+- Provide credentials through secrets or environment variables.
+- Do not commit `config.yaml`, Kubernetes Secrets, or real metric samples.
+- Restrict network access to `/metrics` and health endpoints.
+- Do not enable `tls_skip_verify` unless the network is controlled and you understand the risk.

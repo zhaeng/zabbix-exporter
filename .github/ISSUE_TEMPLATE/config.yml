@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 安全漏洞
+  - name: Security vulnerability
     url: https://github.com/zhaeng/zabbix-exporter/security/advisories/new
-    about: 请通过私密漏洞报告渠道提交，不要创建公开 Issue。
+    about: Use the private vulnerability reporting channel instead of opening a public issue.
