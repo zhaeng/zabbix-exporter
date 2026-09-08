@@ -20,7 +20,7 @@
 
 ## 要求
 
-- Go 1.24.4 或兼容工具链
+- Go 1.25 或更高版本；推荐使用 `go.mod` 指定的安全补丁工具链
 - 可访问的 Zabbix JSON-RPC API
 - API key，或具备读取 host、host group、item 和 history 权限的 Zabbix 用户
 

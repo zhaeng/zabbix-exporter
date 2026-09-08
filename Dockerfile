@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.26.8-alpine AS builder
 
 ARG VERSION=dev
 ARG GIT_COMMIT=unknown

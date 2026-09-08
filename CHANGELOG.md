@@ -11,5 +11,6 @@
 - Prometheus Pull 和 Remote Write Push
 - exporter 自监控指标、健康与就绪检查
 - Kubernetes 示例和 Grafana dashboard
+- 安全更新：升级 Go 工具链及 Prometheus 依赖
 
 [Unreleased]: https://github.com/zhaeng/zabbix-exporter/commits/main
